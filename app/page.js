@@ -29,7 +29,7 @@ const data = [
 
 export default function Home() {
   const [showChart, setShowChart] = useState(false);
-  const [coinPrices, setCoinPrices] = useState({});
+  const [coinPrices, setCoinPrices] = useState([]);
 
   useEffect(() => {
     const func = async () => {
