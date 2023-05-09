@@ -10,6 +10,7 @@ import {
   Tooltip,
 } from "recharts";
 import { useEffect, useState } from "react";
+import { coins } from "../constants/config";
 
 const data = [
   { time: "00:00", cost: 20 },
@@ -28,9 +29,32 @@ const data = [
 
 export default function Home() {
   const [showChart, setShowChart] = useState(false);
+  const [coinPrices, setCoinPrices] = useState({});
 
   useEffect(() => {
-    setShowChart(true);
+    const func = async () => {
+      let res = await fetch("/api/price");
+      let prices = await res.json();
+
+      const symbolUsdArray = Object.keys(prices).map((key) => {
+        const coinData = coins[key];
+        const chain = Object.keys(coinData)[0];
+        const symbol = coinData[chain].symbol;
+        const usd = prices[key].usd;
+      
+        return { symbol, usd };
+      });
+      
+      console.log(symbolUsdArray);
+
+      setCoinPrices(symbolUsdArray);
+    }
+
+    func().then(()=>{
+      setShowChart(true);
+    }).catch((err)=>{
+      console.error(err);
+    })
   }, []);
 
   return (
@@ -38,22 +62,16 @@ export default function Home() {
       <h1>Cross Chain Fees Manager</h1>
       <div className="subtitle subtitle-1">Support Chains & Current Price</div>
       <div className="section">
-        <div className="card card-1">
-          <div className="card-title">ETH</div>
-          <div className="card-text">$1843</div>
-        </div>
-        <div className="card card-1">
-          <div className="card-title">WAN</div>
-          <div className="card-text">$0.215</div>
-        </div>
-        <div className="card card-1">
-          <div className="card-title">BSC</div>
-          <div className="card-text">$200</div>
-        </div>
-        <div className="card card-1">
-          <div className="card-title">AVAX</div>
-          <div className="card-text">$30</div>
-        </div>
+        {
+          coinPrices.map((coinPrice) => {
+            return (
+              <div className="card card-1">
+                <div className="card-title">{coinPrice.symbol}</div>
+                <div className="card-text">${coinPrice.usd}</div>
+              </div>
+            );
+          })
+        }
       </div>
 
       <br />
