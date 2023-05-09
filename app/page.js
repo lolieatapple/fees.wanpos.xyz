@@ -65,7 +65,7 @@ export default function Home() {
         {
           coinPrices.map((coinPrice) => {
             return (
-              <div className="card card-1">
+              <div key={coinPrice.symbol} className="card card-1">
                 <div className="card-title">{coinPrice.symbol}</div>
                 <div className="card-text">${coinPrice.usd}</div>
               </div>
