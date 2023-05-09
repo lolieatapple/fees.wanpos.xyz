@@ -1,54 +1,104 @@
+"use client";
+
 import "./globals.css";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from "recharts";
+import { useEffect, useState } from "react";
+
+const data = [
+  { time: "00:00", cost: 20 },
+  { time: "02:00", cost: 25 },
+  { time: "04:00", cost: 30 },
+  { time: "06:00", cost: 35 },
+  { time: "08:00", cost: 40 },
+  { time: "10:00", cost: 45 },
+  { time: "12:00", cost: 50 },
+  { time: "14:00", cost: 55 },
+  { time: "16:00", cost: 60 },
+  { time: "18:00", cost: 65 },
+  { time: "20:00", cost: 70 },
+  { time: "22:00", cost: 75 },
+];
 
 export default function Home() {
+  const [showChart, setShowChart] = useState(false);
+
+  useEffect(() => {
+    setShowChart(true);
+  }, []);
+
   return (
     <div className="container">
       <h1>Cross Chain Fees Manager</h1>
       <div className="subtitle subtitle-1">Support Chains & Current Price</div>
-      <div>
-        <span className="chain">
-          <span>ETH</span>
-          <span className="price">$1843</span>
-        </span>
-        <span className="chain">
-          <span>WAN</span>
-          <span className="price">$0.215</span>
-        </span>
-        <span className="chain">
-          <span>BSC</span>
-          <span className="price">$200</span>
-        </span>
-        <span className="chain">
-          <span>AVAX</span>
-          <span className="price">$30</span>
-        </span>
+      <div className="section">
+        <div className="card card-1">
+          <div className="card-title">ETH</div>
+          <div className="card-text">$1843</div>
+        </div>
+        <div className="card card-1">
+          <div className="card-title">WAN</div>
+          <div className="card-text">$0.215</div>
+        </div>
+        <div className="card card-1">
+          <div className="card-title">BSC</div>
+          <div className="card-text">$200</div>
+        </div>
+        <div className="card card-1">
+          <div className="card-title">AVAX</div>
+          <div className="card-text">$30</div>
+        </div>
       </div>
+
       <br />
       <div className="subtitle subtitle-2">
         Last 72 hours average costs & current fees
       </div>
-      <div>
-        <span className="chain">
-          <span>ETH</span>
-          <span className="cost">$30</span>
-          <span className="current">$20</span>
-        </span>
-        <span className="chain">
-          <span>WAN</span>
-          <span className="cost">$0.1</span>
-          <span className="current">$0</span>
-        </span>
-        <span className="chain">
-          <span>BSC</span>
-          <span className="cost">$0.01</span>
-          <span className="current">$0</span>
-        </span>
-        <span className="chain">
-          <span>AVAX</span>
-          <span className="cost">$0.5</span>
-          <span className="current">$0.5</span>
-        </span>
+      <div className="section">
+        <div className="card">
+          <div className="card-title">ETH</div>
+          <div className="card-text">Avg: $30</div>
+          <div className="card-text">Current: $20</div>
+          <div className="tooltip-container">
+            {showChart && (
+              <LineChart width={300} height={200} data={data}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="time" />
+                <YAxis />
+                <Tooltip />
+                <Line
+                  type="monotone"
+                  dataKey="cost"
+                  stroke="#8884d8"
+                  activeDot={{ r: 8 }}
+                />
+              </LineChart>
+            )}
+          </div>
+        </div>
+        <div className="card">
+          <div className="card-title">WAN</div>
+          <div className="card-text">Avg: $0.1</div>
+          <div className="card-text">Current: $0</div>
+        </div>
+        <div className="card">
+          <div className="card-title">BSC</div>
+          <div className="card-text">Avg: $0.01</div>
+          <div className="card-text">Current: $0</div>
+        </div>
+        <div className="card">
+          <div className="card-title">AVAX</div>
+          <div className="card-text">Avg: $0.5</div>
+          <div className="card-text">Current: $0.5</div>
+        </div>
       </div>
+
       <br />
       <div className="subtitle subtitle-3">
         Adjust cross to ETH chain fees (amount & price & value)
@@ -56,11 +106,13 @@ export default function Home() {
       <div>
         Target Fee: <input /> USD
       </div>
+      <i>* You can request to add custom rules, such as setting all transaction fees below 0.1$ to 0 and keeping the decimal part to two significant digits.</i>
       <table>
         <thead>
           <tr>
             <th>Chain</th>
             <th>Amount</th>
+            <th>Decimals</th>
             <th>Price</th>
             <th>Value</th>
           </tr>
@@ -69,18 +121,21 @@ export default function Home() {
           <tr>
             <td>WAN</td>
             <td>10</td>
+            <td>18</td>
             <td>$0.5</td>
             <td>$5</td>
           </tr>
           <tr>
             <td>BSC</td>
             <td>0.01</td>
+            <td>18</td>
             <td>$100</td>
             <td>$1</td>
           </tr>
           <tr>
             <td>AVAX</td>
             <td>0.1</td>
+            <td>18</td>
             <td>$30</td>
             <td>$3</td>
           </tr>
@@ -88,7 +143,7 @@ export default function Home() {
       </table>
 
       <br />
-      <div className="subtitle subtitle-1">Operations</div>
+      <div className="subtitle subtitle-4">Operations</div>
       <button>Generate CSV</button>
       <button>Generate JSON</button>
     </div>
