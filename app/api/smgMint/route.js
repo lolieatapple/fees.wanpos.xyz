@@ -19,6 +19,10 @@ export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const chain = searchParams.get('chain');
+    let range = searchParams.get('range');
+
+    range = range ? parseInt(range) : 1000;
+
     console.log('chain', chain);
     if (!chain) {
       return NextResponse.json({ error: "chain is required" });
@@ -39,7 +43,7 @@ export async function GET(req) {
 
     let blockNumber = await iWan.getBlockNumber(_chainType);
     const maxSearchBlock = 30000;
-    const onceSearchBlock = 500;
+    const onceSearchBlock = range;
     const maxEventsCount = 10;
     let events = [];
     const fromBlock = Math.max(blockNumber - maxSearchBlock, 1);
