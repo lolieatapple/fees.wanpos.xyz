@@ -41,26 +41,28 @@ export async function GET(req) {
     const SmgReleaseLogger = iface.getEventTopic("SmgReleaseLogger");
     const SmgMintLogger = iface.getEventTopic("SmgMintLogger");
 
-    let blockNumber = await iWan.getBlockNumber(_chainType);
     const maxSearchBlock = 30000;
     const onceSearchBlock = range;
     const maxEventsCount = 10;
+    const currentBlockNumber = await iWan.getBlockNumber(_chainType);
+    const fromBlock = Math.max(currentBlockNumber - 17280, 1);
+
+    console.log(chain, _chainType, 'current block:', currentBlockNumber);
+
     let events = [];
-    const fromBlock = Math.max(blockNumber - maxSearchBlock, 1);
+    let blockNumber = currentBlockNumber;
 
-    console.log(chain, _chainType, "current block:", blockNumber);
-
-    while (events.length < maxEventsCount && blockNumber > fromBlock) {
+    while (events.length < maxEventsCount && blockNumber >= fromBlock) {
       const toBlock = Math.max(blockNumber - onceSearchBlock, fromBlock);
-      console.log(chain, 'scanning block', toBlock, 'to', blockNumber, '...');
+      console.log(chain, 'scanning block', toBlock + 1, 'to', blockNumber, '...');
       const batchEvents = await Promise.all([
         iWan.getScEvent(_chainType, evmLockAddress[chain], [SmgReleaseLogger], {
-          fromBlock,
-          toBlock,
+          fromBlock: toBlock + 1,
+          toBlock: blockNumber,
         }),
         iWan.getScEvent(_chainType, evmLockAddress[chain], [SmgMintLogger], {
-          fromBlock,
-          toBlock,
+          fromBlock: toBlock + 1,
+          toBlock: blockNumber,
         }),
       ]);
       const newEvents = batchEvents.reduce((acc, cur) => acc.concat(cur), []);
