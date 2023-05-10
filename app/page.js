@@ -9,40 +9,118 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
-import { useEffect, useState } from "react";
-import { coins } from "../constants/config";
+import { useEffect, useMemo, useState } from "react";
+import { coins, chainType, evmLockAddress } from "../constants/config";
 
-const data = [
-  { time: "00:00", cost: 20 },
-  { time: "02:00", cost: 25 },
-  { time: "04:00", cost: 30 },
-  { time: "06:00", cost: 35 },
-  { time: "08:00", cost: 40 },
-  { time: "10:00", cost: 45 },
-  { time: "12:00", cost: 50 },
-  { time: "14:00", cost: 55 },
-  { time: "16:00", cost: 60 },
-  { time: "18:00", cost: 35 },
-  { time: "20:00", cost: 20 },
-  { time: "22:00", cost: 35 },
-];
+const DataCard = ({ coinPrices, chain }) => {
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState([]);
 
-const DataCard = ({ coinPrice, loading }) => {
+  const coinPrice = useMemo(()=>{
+    let coinPrice = {
+      symbol: "N/A",
+      usd: "N/A",
+    };
+  
+    if (coinPrices && coinPrices.length > 0) {
+      let _price = coinPrices.find((coinPrice) => coinPrice.chain === chain);
+      if (_price) {
+        coinPrice.symbol = _price.symbol;
+        coinPrice.usd = _price.usd;
+      }
+  
+      if (["arbitrum", "optimism"].includes(chain)) {
+        let _price = coinPrices.find(
+          (coinPrice) => coinPrice.chain === "ethereum"
+        );
+        if (_price) {
+          coinPrice.symbol = _price.symbol;
+          coinPrice.usd = _price.usd;
+        }
+      }
+    }
+    return coinPrice;
+  }, [coinPrices, chain]);
+
+
+  useEffect(() => {
+    if (!evmLockAddress[chain]) {
+      console.log(chain, "not supported");
+      return;
+    }
+    
+    if (coinPrices.length === 0) {
+      console.log('price not ready');
+      return;
+    }
+    
+    const func = async () => {
+      console.log(chain, 'searching for history...');
+      try {
+        setLoading(true);
+        let historyCache = window.localStorage.getItem("historyCache_" + chain);
+        if (historyCache) {
+          historyCache = JSON.parse(historyCache);
+          const now = new Date();
+          const cacheTime = new Date(historyCache.time);
+          const diff = now - cacheTime;
+          if (diff < 1000 * 180) {
+            console.log(chain, "using cached history");
+            setData(historyCache.data);
+            return;
+          }
+        }
+
+        let res = await fetch("/api/smgMint?chain=" + chain);
+        let history = await res.json();
+        
+        console.log(chain, "history", history);
+        if (history && history.success) {
+          history.data = history.data.map(v=>{
+            return {
+              time: new Date(v.timestamp * 1000).toLocaleTimeString(),
+              cost: coinPrice.usd !== 'N/A' ? Number(v.gasFee) * Number(coinPrice.usd) : v.gasFee,
+            }
+          })
+          window.localStorage.setItem(
+            "historyCache_" + chain,
+            JSON.stringify({
+              time: new Date(),
+              data: history.data,
+            })
+          );
+
+          setData(history.data);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    func()
+      .then(() => {
+        console.log(chain, "done");
+      })
+      .catch(console.error);
+  }, [chain, coinPrice]);
+
+
+
   return (
     <div key={coinPrice.symbol} className="card card-wide">
-      {loading && (
-        <div className="loading-overlay">
-          Loading...
-        </div>
-      )}
+      {loading && <div className="loading-overlay">Loading...</div>}
       <div className="card-content">
-        <div className="card-title">{coinPrice.symbol}</div>
+        <div className="card-title">{chain}</div>
         <div className="card-text">Avg Cost: $30</div>
         <div className="card-text">Current Fee: $20</div>
-        <div className="card-text">Price: ${coinPrice.usd}</div>
+        <div className="card-text">
+          {coinPrice.symbol} Price: ${coinPrice.usd}
+        </div>
       </div>
       <div className="card-chart">
-        <LineChart width={550} height={130} data={data}>
+        <LineChart width={500} height={130} data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="time" />
           <YAxis />
@@ -60,7 +138,6 @@ const DataCard = ({ coinPrice, loading }) => {
 };
 
 export default function Home() {
-  const [showChart, setShowChart] = useState(false);
   const [coinPrices, setCoinPrices] = useState([]);
 
   useEffect(() => {
@@ -87,7 +164,7 @@ export default function Home() {
         const symbol = coinData[chain].symbol;
         const usd = prices[key].usd;
 
-        return { symbol, usd };
+        return { chain, symbol, usd };
       });
 
       console.log(symbolUsdArray);
@@ -103,9 +180,7 @@ export default function Home() {
     };
 
     func()
-      .then(() => {
-        setShowChart(true);
-      })
+      .then(() => {})
       .catch((err) => {
         console.error(err);
       });
@@ -125,14 +200,8 @@ export default function Home() {
       </div>
 
       <div className="section">
-        {coinPrices.map((coinPrice, i) => {
-          return (
-            <DataCard
-              key={coinPrice.symbol}
-              coinPrice={coinPrice}
-              loading={i % 3 === 0}
-            />
-          );
+        {Object.keys(chainType).map((chain) => {
+          return <DataCard key={chain} chain={chain} coinPrices={coinPrices} />;
         })}
       </div>
 

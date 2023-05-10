@@ -131,7 +131,7 @@ th {
   display: flex;
   flex-direction: column; /* Add this line */
   margin-right: 1rem; /* Add this line */
-  width: 20%; /* Add this line to set the chart's width */
+  width: 30%; /* Add this line to set the chart's width */
 }
 
 .card-wide {
@@ -141,7 +141,7 @@ th {
 }
 
 .card-chart {
-  width: 80%; /* Add this line to set the chart's width */
+  width: 70%; /* Add this line to set the chart's width */
 }
 
 .card-title {
