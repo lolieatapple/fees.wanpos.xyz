@@ -52,8 +52,11 @@ export async function GET(req) {
     let events = [];
     let blockNumber = currentBlockNumber;
 
-    while (events.length < maxEventsCount && blockNumber >= fromBlock) {
+    while (events.length < maxEventsCount && blockNumber >= fromBlock ) {
       const toBlock = Math.max(blockNumber - onceSearchBlock, fromBlock);
+      if (toBlock >= blockNumber) {
+        break;
+      }
       
       const batchEvents = await Promise.all([
         iWan.getScEvent(_chainType, evmLockAddress[chain], [SmgReleaseLogger], {
