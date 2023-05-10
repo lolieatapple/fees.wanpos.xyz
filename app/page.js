@@ -11,10 +11,12 @@ import {
 } from "recharts";
 import { useEffect, useMemo, useState } from "react";
 import { coins, chainType, evmLockAddress } from "../constants/config";
+import Head from "next/head";
 
-const DataCard = ({ coinPrices, chain }) => {
+const DataCard = ({ coinPrices, chain, forceUpdate }) => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
+  const [average, setAverage] = useState(0);
 
   const coinPrice = useMemo(()=>{
     let coinPrice = {
@@ -40,7 +42,7 @@ const DataCard = ({ coinPrices, chain }) => {
       }
     }
     return coinPrice;
-  }, [coinPrices, chain]);
+  }, [coinPrices, chain, forceUpdate]);
 
 
   useEffect(() => {
@@ -53,7 +55,7 @@ const DataCard = ({ coinPrices, chain }) => {
       console.log('price not ready');
       return;
     }
-    
+
     const func = async () => {
       console.log(chain, 'searching for history...');
       try {
@@ -79,7 +81,7 @@ const DataCard = ({ coinPrices, chain }) => {
           history.data = history.data.map(v=>{
             return {
               time: new Date(v.timestamp * 1000).toLocaleTimeString(),
-              cost: coinPrice.usd !== 'N/A' ? Number(v.gasFee) * Number(coinPrice.usd) : v.gasFee,
+              cost: coinPrice.usd !== 'N/A' ? (Number(v.gasFee) * Number(coinPrice.usd)).toFixed(4) : v.gasFee,
             }
           })
           window.localStorage.setItem(
@@ -91,6 +93,9 @@ const DataCard = ({ coinPrices, chain }) => {
           );
 
           setData(history.data);
+          const costs = history.data.map(item => parseFloat(item.cost) || 0);
+          const averageCost = costs.reduce((acc, curr) => acc + curr, 0) / costs.length;
+          setAverage(averageCost.toFixed(4));
         }
       } catch (error) {
         console.error(error);
@@ -104,7 +109,7 @@ const DataCard = ({ coinPrices, chain }) => {
         console.log(chain, "done");
       })
       .catch(console.error);
-  }, [chain, coinPrice]);
+  }, [chain, coinPrice, forceUpdate]);
 
 
 
@@ -113,7 +118,7 @@ const DataCard = ({ coinPrices, chain }) => {
       {loading && <div className="loading-overlay">Loading...</div>}
       <div className="card-content">
         <div className="card-title">{chain}</div>
-        <div className="card-text">Avg Cost: $30</div>
+        <div className="card-text">Avg Cost: ${average}</div>
         <div className="card-text">Current Fee: $20</div>
         <div className="card-text">
           {coinPrice.symbol} Price: ${coinPrice.usd}
@@ -139,6 +144,7 @@ const DataCard = ({ coinPrices, chain }) => {
 
 export default function Home() {
   const [coinPrices, setCoinPrices] = useState([]);
+  const [forceUpdate, setForceUpdate] = useState(0);
 
   useEffect(() => {
     const func = async () => {
@@ -184,24 +190,27 @@ export default function Home() {
       .catch((err) => {
         console.error(err);
       });
-  }, []);
+  }, [forceUpdate]);
 
   return (
     <div className="container">
+      <Head>
+        <title>Cross Chain Fees Manager</title>
+      </Head>
       <h1>Cross Chain Fees Manager</h1>
       <br />
       <div className="subtitle-container">
         <div className="subtitle subtitle-2">
           Last 72 hours average costs & current fees
         </div>
-        <button className="refresh-button" onClick={() => {}}>
+        <button className="refresh-button" onClick={() => {setForceUpdate(Date.now())}}>
           Refresh
         </button>
       </div>
 
       <div className="section">
         {Object.keys(chainType).map((chain) => {
-          return <DataCard key={chain} chain={chain} coinPrices={coinPrices} />;
+          return <DataCard key={chain} chain={chain} coinPrices={coinPrices} forceUpdate={forceUpdate} />;
         })}
       </div>
 

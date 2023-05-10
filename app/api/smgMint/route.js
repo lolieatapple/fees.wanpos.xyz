@@ -21,7 +21,7 @@ export async function GET(req) {
     const chain = searchParams.get('chain');
     let range = searchParams.get('range');
 
-    range = range ? parseInt(range) : 1000;
+    range = range ? parseInt(range) : 2000;
 
     console.log('chain', chain);
     if (!chain) {
@@ -52,27 +52,37 @@ export async function GET(req) {
     let events = [];
     let blockNumber = currentBlockNumber;
 
-    while (events.length < maxEventsCount && blockNumber >= fromBlock ) {
-      const toBlock = Math.max(blockNumber - onceSearchBlock, fromBlock);
-      if (toBlock >= blockNumber) {
-        break;
-      }
-      
-      const batchEvents = await Promise.all([
-        iWan.getScEvent(_chainType, evmLockAddress[chain], [SmgReleaseLogger], {
-          fromBlock: toBlock + 1,
-          toBlock: blockNumber,
-        }),
-        iWan.getScEvent(_chainType, evmLockAddress[chain], [SmgMintLogger], {
-          fromBlock: toBlock + 1,
-          toBlock: blockNumber,
-        }),
-      ]);
+    let errorCnt = 0;
 
-      const newEvents = batchEvents.reduce((acc, cur) => acc.concat(cur), []);
-      console.log(chain, 'scanning block', toBlock + 1, 'to', blockNumber, 'event count:', newEvents.length);
-      events = [...newEvents, ...events].slice(0, maxEventsCount);
-      blockNumber = toBlock;
+    while (events.length < maxEventsCount && blockNumber >= fromBlock ) {
+      try {
+        const toBlock = Math.max(blockNumber - onceSearchBlock, fromBlock);
+        if (toBlock >= blockNumber) {
+          break;
+        }
+        const batchEvents = await Promise.all([
+          iWan.getScEvent(_chainType, evmLockAddress[chain], [SmgReleaseLogger], {
+            fromBlock: toBlock + 1,
+            toBlock: blockNumber,
+          }),
+          iWan.getScEvent(_chainType, evmLockAddress[chain], [SmgMintLogger], {
+            fromBlock: toBlock + 1,
+            toBlock: blockNumber,
+          }),
+        ]);
+  
+        const newEvents = batchEvents.reduce((acc, cur) => acc.concat(cur), []);
+        console.log(chain, 'scanning block', toBlock + 1, 'to', blockNumber, 'event count:', newEvents.length);
+        events = [...newEvents, ...events].slice(0, maxEventsCount);
+        blockNumber = toBlock;
+      } catch (error) {
+        if (errorCnt++ > 5) {
+          break;
+        }
+        console.log('error', error);
+        // sleep 2s
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
     }
 
     console.log('scanning finished event count:', events.length);
@@ -97,6 +107,7 @@ export async function GET(req) {
     );
 
     console.log("gasFeeList", gasFeeList);
+    iWan.close();
 
     return NextResponse.json({success: true, data: gasFeeList});
   } catch (error) {

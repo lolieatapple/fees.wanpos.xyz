@@ -31,6 +31,27 @@ export const coins = {
       symbol: "AVAX",
     },
   },
+  astar: {
+    astar: {
+      address: null,
+      decimals: 18,
+      symbol: "ASTAR",
+    },
+  },
+  "clover-finance": {
+    clover: {
+      address: null,
+      decimals: 18,
+      symbol: "CLV",
+    }
+  },
+  telos: {
+    telos: {
+      address: null,
+      decimals: 18,
+      symbol: "TLOS",
+    },
+  },
   binancecoin: {
     bsc: {
       address: null,
