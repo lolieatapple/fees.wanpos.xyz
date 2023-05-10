@@ -40,7 +40,7 @@ export async function GET(req) {
     let blockNumber = await iWan.getBlockNumber(_chainType);
     const maxSearchBlock = 30000;
     const onceSearchBlock = 3000;
-    const maxEventsCount = 500;
+    const maxEventsCount = 10;
     let events = [];
     const fromBlock = Math.max(blockNumber - maxSearchBlock, 1);
 
