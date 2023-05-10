@@ -42,10 +42,6 @@ h1 {
   background-color: #ff8a65;
 }
 
-.subtitle-2 {
-  background-color: #7986cb;
-}
-
 .subtitle-3 {
   background-color: #4db6ac;
 }
@@ -120,17 +116,33 @@ th {
 
 
 .card {
-  background-color: #ffffff;
-  border-radius: 5px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  margin: 10px;
-  width: calc(25% - 20px);
-  display: inline-block;
-  vertical-align: top;
-  border-left: 5px solid #3f51b5;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: #f0f0f0;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
 }
 
+.card-content {
+  display: flex;
+  flex-direction: column; /* Add this line */
+  margin-right: 1rem; /* Add this line */
+  width: 20%; /* Add this line to set the chart's width */
+}
+
+.card-wide {
+  flex-direction: row;
+  align-items: flex-start;
+  padding-bottom: 0;
+}
+
+.card-chart {
+  width: 80%; /* Add this line to set the chart's width */
+}
 
 .card-title {
   font-size: 1.2rem;
@@ -140,6 +152,7 @@ th {
 
 .card-text {
   font-size: 1rem;
+  margin-bottom: 10px;
 }
 
 .card-1 {
@@ -154,16 +167,55 @@ th {
   cursor: pointer;
 }
 
-.tooltip-container {
-  display: none;
-  position: absolute;
-  background-color: white;
-  padding: 10px;
-  border: 1px solid #ccc;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 5px;
-}
-
 .card:hover .tooltip-container {
   display: block;
 }
+
+.subtitle-2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: white;
+  padding: 5px 0;
+  margin: 0;
+}
+
+.subtitle-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #3f51b5;
+  border-radius: 5px;
+  padding: 5px 15px;
+  margin-bottom: 10px;
+}
+
+.refresh-button {
+  background-color: transparent;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 5px 10px;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.refresh-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.loading-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem; /* Adjust font size */
+  top: 0;
+  left: 0;
+}
+
+

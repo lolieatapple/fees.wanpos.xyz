@@ -22,10 +22,42 @@ const data = [
   { time: "12:00", cost: 50 },
   { time: "14:00", cost: 55 },
   { time: "16:00", cost: 60 },
-  { time: "18:00", cost: 65 },
-  { time: "20:00", cost: 70 },
-  { time: "22:00", cost: 75 },
+  { time: "18:00", cost: 35 },
+  { time: "20:00", cost: 20 },
+  { time: "22:00", cost: 35 },
 ];
+
+const DataCard = ({ coinPrice, loading }) => {
+  return (
+    <div key={coinPrice.symbol} className="card card-wide">
+      {loading && (
+        <div className="loading-overlay">
+          Loading...
+        </div>
+      )}
+      <div className="card-content">
+        <div className="card-title">{coinPrice.symbol}</div>
+        <div className="card-text">Avg Cost: $30</div>
+        <div className="card-text">Current Fee: $20</div>
+        <div className="card-text">Price: ${coinPrice.usd}</div>
+      </div>
+      <div className="card-chart">
+        <LineChart width={550} height={130} data={data}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="time" />
+          <YAxis />
+          <Tooltip />
+          <Line
+            type="monotone"
+            dataKey="cost"
+            stroke="#8884d8"
+            activeDot={{ r: 8 }}
+          />
+        </LineChart>
+      </div>
+    </div>
+  );
+};
 
 export default function Home() {
   const [showChart, setShowChart] = useState(false);
@@ -33,6 +65,19 @@ export default function Home() {
 
   useEffect(() => {
     const func = async () => {
+      let pricesCache = window.localStorage.getItem("pricesCache");
+      if (pricesCache) {
+        pricesCache = JSON.parse(pricesCache);
+        const now = new Date();
+        const cacheTime = new Date(pricesCache.time);
+        const diff = now - cacheTime;
+        if (diff < 1000 * 60) {
+          console.log("using cached prices");
+          setCoinPrices(pricesCache.prices);
+          return;
+        }
+      }
+
       let res = await fetch("/api/price");
       let prices = await res.json();
 
@@ -48,6 +93,13 @@ export default function Home() {
       console.log(symbolUsdArray);
 
       setCoinPrices(symbolUsdArray);
+      window.localStorage.setItem(
+        "pricesCache",
+        JSON.stringify({
+          time: new Date(),
+          prices: symbolUsdArray,
+        })
+      );
     };
 
     func()
@@ -62,46 +114,24 @@ export default function Home() {
   return (
     <div className="container">
       <h1>Cross Chain Fees Manager</h1>
-      <div className="subtitle subtitle-1">Support Chains & Current Price</div>
-      <div className="section">
-        {coinPrices.map((coinPrice) => {
-          return (
-            <div key={coinPrice.symbol} className="card card-1">
-              <div className="card-title">{coinPrice.symbol}</div>
-              <div className="card-text">${coinPrice.usd}</div>
-            </div>
-          );
-        })}
+      <br />
+      <div className="subtitle-container">
+        <div className="subtitle subtitle-2">
+          Last 72 hours average costs & current fees
+        </div>
+        <button className="refresh-button" onClick={() => {}}>
+          Refresh
+        </button>
       </div>
 
-      <br />
-      <div className="subtitle subtitle-2">
-        Last 72 hours average costs & current fees
-      </div>
       <div className="section">
-        {coinPrices.map((coinPrice) => {
+        {coinPrices.map((coinPrice, i) => {
           return (
-            <div key={coinPrice.symbol} className="card">
-              <div className="card-title">{coinPrice.symbol}</div>
-              <div className="card-text">Avg: $30</div>
-              <div className="card-text">Current: $20</div>
-              <div className="tooltip-container">
-                {showChart && (
-                  <LineChart width={300} height={200} data={data}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="time" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line
-                      type="monotone"
-                      dataKey="cost"
-                      stroke="#8884d8"
-                      activeDot={{ r: 8 }}
-                    />
-                  </LineChart>
-                )}
-              </div>
-            </div>
+            <DataCard
+              key={coinPrice.symbol}
+              coinPrice={coinPrice}
+              loading={i % 3 === 0}
+            />
           );
         })}
       </div>
@@ -129,19 +159,17 @@ export default function Home() {
           </tr>
         </thead>
         <tbody>
-          {
-            coinPrices.map((coinPrice) => {
-              return (
-                <tr key={coinPrice.symbol}>
-                  <td>{coinPrice.symbol}</td>
-                  <td>0.1</td>
-                  <td>18</td>
-                  <td>${coinPrice.usd}</td>
-                  <td>$1</td>
-                </tr>
-              );
-            })
-          }
+          {coinPrices.map((coinPrice) => {
+            return (
+              <tr key={coinPrice.symbol}>
+                <td>{coinPrice.symbol}</td>
+                <td>0.1</td>
+                <td>18</td>
+                <td>${coinPrice.usd}</td>
+                <td>$1</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 
