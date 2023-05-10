@@ -54,7 +54,7 @@ export async function GET(req) {
 
     while (events.length < maxEventsCount && blockNumber >= fromBlock) {
       const toBlock = Math.max(blockNumber - onceSearchBlock, fromBlock);
-      console.log(chain, 'scanning block', toBlock + 1, 'to', blockNumber, '...');
+      
       const batchEvents = await Promise.all([
         iWan.getScEvent(_chainType, evmLockAddress[chain], [SmgReleaseLogger], {
           fromBlock: toBlock + 1,
@@ -65,7 +65,9 @@ export async function GET(req) {
           toBlock: blockNumber,
         }),
       ]);
+
       const newEvents = batchEvents.reduce((acc, cur) => acc.concat(cur), []);
+      console.log(chain, 'scanning block', toBlock + 1, 'to', blockNumber, 'event count:', newEvents.length);
       events = [...newEvents, ...events].slice(0, maxEventsCount);
       blockNumber = toBlock;
     }
