@@ -384,13 +384,7 @@ export default function Home() {
             //   headers: myHeaders
             // });
             // fees = await fees.json();
-            let fees = await axios.get('/api/currentFee', {
-              headers: {
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache',
-                'Expires': '0',
-              }
-            });
+            let fees = await axios.get('/api/currentFee' + '?t=' + Date.now());
             fees = fees.data;
             fees = fees.data;
             const csv = convertArrayOfObjectsToCSV('TokenPairId,From,To,Symbol,Decimals,NetworkFee,IsPercent,OperationFee,IsPercent', fees);
