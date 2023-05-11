@@ -18,19 +18,19 @@ const DataCard = ({ coinPrices, chain, forceUpdate }) => {
   const [data, setData] = useState([]);
   const [average, setAverage] = useState(0);
 
-  const coinPrice = useMemo(()=>{
+  const coinPrice = useMemo(() => {
     let coinPrice = {
       symbol: "N/A",
       usd: "N/A",
     };
-  
+
     if (coinPrices && coinPrices.length > 0) {
       let _price = coinPrices.find((coinPrice) => coinPrice.chain === chain);
       if (_price) {
         coinPrice.symbol = _price.symbol;
         coinPrice.usd = _price.usd;
       }
-  
+
       if (["arbitrum", "optimism"].includes(chain)) {
         let _price = coinPrices.find(
           (coinPrice) => coinPrice.chain === "ethereum"
@@ -44,20 +44,88 @@ const DataCard = ({ coinPrices, chain, forceUpdate }) => {
     return coinPrice;
   }, [coinPrices, chain, forceUpdate]);
 
-
   useEffect(() => {
     if (!evmLockAddress[chain]) {
-      console.log(chain, "not supported");
+      if (!["btc", "doge", "ltc"].includes(chain)) {
+        console.log(chain, "not supported");
+        return;
+      }
+      const func = async () => {
+        let feeRate = await fetch("/api/feeRate");
+        feeRate = await feeRate.json();
+        if (chain === "btc") {
+          feeRate = feeRate.map((v) => {
+            return {
+              time:
+                new Date(v.timestamp).toLocaleDateString() +
+                " " +
+                new Date(v.timestamp).getHours() +
+                ":" +
+                new Date(v.timestamp).getMinutes(),
+              cost:
+                coinPrice.usd !== "N/A"
+                  ? (
+                      ((Number(v.btcFeeRate) * 0.304) / 1e8) *
+                      Number(coinPrice.usd)
+                    ).toFixed(4)
+                  : v.btcFeeRate / 1e8,
+            };
+          });
+        } else if (chain === "doge") {
+          feeRate = feeRate.map((v) => {
+            return {
+              time:
+                new Date(v.timestamp).toLocaleDateString() +
+                " " +
+                new Date(v.timestamp).getHours() +
+                ":" +
+                new Date(v.timestamp).getMinutes(),
+              cost:
+                coinPrice.usd !== "N/A"
+                  ? (
+                      ((Number(v.dogeFeeRate) * 0.304) / 1e8) *
+                      Number(coinPrice.usd)
+                    ).toFixed(4)
+                  : v.dogeFeeRate / 1e8,
+            };
+          });
+        } else if (chain === "ltc") {
+          feeRate = feeRate.map((v) => {
+            return {
+              time:
+                new Date(v.timestamp).toLocaleDateString() +
+                " " +
+                new Date(v.timestamp).getHours() +
+                ":" +
+                new Date(v.timestamp).getMinutes(),
+              cost:
+                coinPrice.usd !== "N/A"
+                  ? (
+                      ((Number(v.ltcFeeRate) * 0.304) / 1e8) *
+                      Number(coinPrice.usd)
+                    ).toFixed(4)
+                  : v.ltcFeeRate / 1e8,
+            };
+          });
+        }
+        setData(feeRate);
+        const costs = feeRate.map((item) => parseFloat(item.cost) || 0);
+        const averageCost =
+          costs.reduce((acc, curr) => acc + curr, 0) / costs.length;
+        setAverage(averageCost.toFixed(4));
+      };
+
+      func().then().catch(console.error);
       return;
     }
-    
+
     if (coinPrices.length === 0) {
-      console.log('price not ready');
+      console.log("price not ready");
       return;
     }
 
     const func = async () => {
-      console.log(chain, 'searching for history...');
+      console.log(chain, "searching for history...");
       try {
         setLoading(true);
         let historyCache = window.localStorage.getItem("historyCache_" + chain);
@@ -75,15 +143,23 @@ const DataCard = ({ coinPrices, chain, forceUpdate }) => {
 
         let res = await fetch("/api/smgMint?chain=" + chain);
         let history = await res.json();
-        
+
         console.log(chain, "history", history);
         if (history && history.success) {
-          history.data = history.data.map(v=>{
+          history.data = history.data.map((v) => {
             return {
-              time: new Date(v.timestamp * 1000).toLocaleDateString() + ' ' + new Date(v.timestamp * 1000).getHours() + ':' + new Date(v.timestamp * 1000).getMinutes(),
-              cost: coinPrice.usd !== 'N/A' ? (Number(v.gasFee) * Number(coinPrice.usd)).toFixed(4) : v.gasFee,
-            }
-          })
+              time:
+                new Date(v.timestamp * 1000).toLocaleDateString() +
+                " " +
+                new Date(v.timestamp * 1000).getHours() +
+                ":" +
+                new Date(v.timestamp * 1000).getMinutes(),
+              cost:
+                coinPrice.usd !== "N/A"
+                  ? (Number(v.gasFee) * Number(coinPrice.usd)).toFixed(4)
+                  : v.gasFee,
+            };
+          });
           window.localStorage.setItem(
             "historyCache_" + chain,
             JSON.stringify({
@@ -93,8 +169,9 @@ const DataCard = ({ coinPrices, chain, forceUpdate }) => {
           );
 
           setData(history.data);
-          const costs = history.data.map(item => parseFloat(item.cost) || 0);
-          const averageCost = costs.reduce((acc, curr) => acc + curr, 0) / costs.length;
+          const costs = history.data.map((item) => parseFloat(item.cost) || 0);
+          const averageCost =
+            costs.reduce((acc, curr) => acc + curr, 0) / costs.length;
           setAverage(averageCost.toFixed(4));
         }
       } catch (error) {
@@ -110,8 +187,6 @@ const DataCard = ({ coinPrices, chain, forceUpdate }) => {
       })
       .catch(console.error);
   }, [chain, coinPrice, forceUpdate]);
-
-
 
   return (
     <div key={coinPrice.symbol} className="card card-wide">
@@ -203,14 +278,26 @@ export default function Home() {
         <div className="subtitle subtitle-2">
           Last 72 hours average costs & current fees
         </div>
-        <button className="refresh-button" onClick={() => {setForceUpdate(Date.now())}}>
+        <button
+          className="refresh-button"
+          onClick={() => {
+            setForceUpdate(Date.now());
+          }}
+        >
           Refresh
         </button>
       </div>
 
       <div className="section">
         {Object.keys(chainType).map((chain) => {
-          return <DataCard key={chain} chain={chain} coinPrices={coinPrices} forceUpdate={forceUpdate} />;
+          return (
+            <DataCard
+              key={chain}
+              chain={chain}
+              coinPrices={coinPrices}
+              forceUpdate={forceUpdate}
+            />
+          );
         })}
       </div>
 
