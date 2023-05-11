@@ -29,6 +29,10 @@ function get3dayBlocks(chain) {
     return 20000;
   }
 
+  if (chain === 'fantom') {
+    return 129600;
+  }
+
   return 30000;
 }
 
@@ -54,7 +58,7 @@ function getScanLimit(chain) {
   }
 
   if (chain === 'optimism') {
-    return 500;
+    return 3000;
   }
 
   if (chain === 'ethereum') {
@@ -63,6 +67,10 @@ function getScanLimit(chain) {
 
   if (chain === 'astar') {
     return 1000;
+  }
+
+  if (chain === 'fantom') {
+    return 3000;
   }
 
   return 5000;

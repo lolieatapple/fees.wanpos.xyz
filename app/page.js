@@ -309,7 +309,10 @@ export default function Home() {
       </div>
 
       <div className="section">
-        {Object.keys(chainType).map((chain) => {
+        {
+        Object.keys(chainType)
+          // .filter(v=>v==='fantom')
+          .map((chain) => {
           return (
             <DataCard
               key={chain}
