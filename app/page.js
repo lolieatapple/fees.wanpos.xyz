@@ -45,6 +45,11 @@ const DataCard = ({ coinPrices, chain, forceUpdate }) => {
   }, [coinPrices, chain, forceUpdate]);
 
   useEffect(() => {
+    if (coinPrices.length === 0) {
+      console.log("price not ready");
+      return;
+    }
+    
     if (!evmLockAddress[chain]) {
       if (!["btc", "doge", "ltc"].includes(chain)) {
         console.log(chain, "not supported");
@@ -119,10 +124,7 @@ const DataCard = ({ coinPrices, chain, forceUpdate }) => {
       return;
     }
 
-    if (coinPrices.length === 0) {
-      console.log("price not ready");
-      return;
-    }
+
 
     const func = async () => {
       console.log(chain, "searching for history...");
@@ -217,9 +219,30 @@ const DataCard = ({ coinPrices, chain, forceUpdate }) => {
   );
 };
 
+function convertArrayOfObjectsToCSV(title, array) {
+  let csv = title + "\n";
+  array.forEach((item) => {
+    csv += Object.values(item).join(",") + "\n";
+  });
+  return csv;
+}
+function downloadCSV(csv, filename) {
+  const link = document.createElement("a");
+  link.style.display = "none";
+  link.setAttribute(
+    "href",
+    "data:text/csv;charset=utf-8," + encodeURIComponent(csv)
+  );
+  link.setAttribute("download", filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 export default function Home() {
   const [coinPrices, setCoinPrices] = useState([]);
   const [forceUpdate, setForceUpdate] = useState(0);
+  const [targetFee, setTargetFee] = useState(20);
 
   useEffect(() => {
     const func = async () => {
@@ -302,25 +325,23 @@ export default function Home() {
       </div>
 
       <br />
-      <div className="subtitle subtitle-3">
-        Adjust cross to ETH chain fees (amount & price & value)
-      </div>
+      <div className="subtitle subtitle-3">Calc cross chain fees</div>
       <div>
-        Target Fee: <input /> USD
+        Target Fee:{" "}
+        <input
+          value={targetFee}
+          onChange={(e) => {
+            setTargetFee(e.target.value);
+          }}
+        />{" "}
+        USD
       </div>
-      <i>
-        * You can request to add custom rules, such as setting all transaction
-        fees below 0.1$ to 0 and keeping the decimal part to two significant
-        digits.
-      </i>
       <table>
         <thead>
           <tr>
             <th>Chain</th>
             <th>Amount</th>
-            <th>Decimals</th>
             <th>Price</th>
-            <th>Value</th>
           </tr>
         </thead>
         <tbody>
@@ -328,10 +349,8 @@ export default function Home() {
             return (
               <tr key={coinPrice.symbol}>
                 <td>{coinPrice.symbol}</td>
-                <td>0.1</td>
-                <td>18</td>
+                <td>{(targetFee / coinPrice.usd).toFixed(8)}</td>
                 <td>${coinPrice.usd}</td>
-                <td>$1</td>
               </tr>
             );
           })}
@@ -340,8 +359,19 @@ export default function Home() {
 
       <br />
       <div className="subtitle subtitle-4">Operations</div>
-      <button>Generate CSV</button>
-      <button>Generate JSON</button>
+      <button onClick={() => {
+        const calc = coinPrices.map((coinPrice) => {
+          return {
+            coin: coinPrice.symbol,
+            amount: (targetFee / coinPrice.usd).toFixed(8),
+            price: coinPrice.usd
+          }
+        });
+
+        const csv = convertArrayOfObjectsToCSV('Coin,Amount,Price', calc);
+        downloadCSV(csv, 'cross-chain-fees_'+ targetFee.toString()+'_'+ (new Date().toISOString().replace(':', '_')) +'.csv');
+      }}>Generate CSV</button>
+      {/* <button>Generate JSON</button> */}
     </div>
   );
 }

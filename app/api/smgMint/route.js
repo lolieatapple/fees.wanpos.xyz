@@ -79,9 +79,9 @@ export async function GET(req) {
         if (errorCnt++ > 5) {
           break;
         }
-        console.log('error', error);
+        console.log(chain, 'error', error);
         // sleep 2s
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 5000));
       }
     }
 
@@ -93,6 +93,9 @@ export async function GET(req) {
           _chainType,
           event.blockHash
         );
+        if (!blockInfo.timestamp) {
+          console.log('blockInfo', blockInfo);
+        }
         const timestamp = blockInfo.timestamp;
         const txInfo = await iWan.getTxInfo(_chainType, event.transactionHash);
         const gasPrice = BigNumber.from(txInfo.gasPrice);

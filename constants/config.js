@@ -219,3 +219,27 @@ export const chainType = {
   "xdc":"XDC",
   "xrp":"XRP",
 }
+
+export const chainId = {
+  "arbitrum": "1073741826",
+  "astar":"0x8000032a",
+  "avalanche":"2147492648",
+  "bsc":"2147484362",
+  "btc":"0x80000000",
+  "clover":"1073741829",
+  "doge":"0x80000003",
+  "ethereum":"2147483708",
+  "fantom":"2147484655",
+  "ltc":"0x80000002",
+  "moonbeam":"1073741825",
+  "moonriver":"1073741825",
+  "okexchain":"2147484644",
+  "optimism":"2147484262",
+  "polkadot":"0x80000162",
+  "polygon":"2147484614",
+  "telos":"2147484625",
+  "tron":"2147483843",
+  "wanchain":"2153201998",
+  "xdc":"0x80000226",
+  "xrp":"0x80000090",
+}
