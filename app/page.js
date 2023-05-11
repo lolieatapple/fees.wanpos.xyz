@@ -66,7 +66,7 @@ const DataCard = ({ coinPrices, chain, forceUpdate }) => {
           const now = new Date();
           const cacheTime = new Date(historyCache.time);
           const diff = now - cacheTime;
-          if (diff < 1000 * 180) {
+          if (diff < 1000 * 30) {
             console.log(chain, "using cached history");
             setData(historyCache.data);
             return;
@@ -80,7 +80,7 @@ const DataCard = ({ coinPrices, chain, forceUpdate }) => {
         if (history && history.success) {
           history.data = history.data.map(v=>{
             return {
-              time: new Date(v.timestamp * 1000).toLocaleTimeString(),
+              time: new Date(v.timestamp * 1000).toLocaleDateString() + ' ' + new Date(v.timestamp * 1000).getHours() + ':' + new Date(v.timestamp * 1000).getMinutes(),
               cost: coinPrice.usd !== 'N/A' ? (Number(v.gasFee) * Number(coinPrice.usd)).toFixed(4) : v.gasFee,
             }
           })
