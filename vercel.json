@@ -2,5 +2,16 @@
   "crons": [{
     "path": "/api/recordFeeRate",
     "schedule": "6 */1 * * *"
-  }]
+  }],
+  "headers": [
+    {
+      "source": "/api/currentFee",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    }
+  ]
 }
