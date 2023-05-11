@@ -372,12 +372,14 @@ export default function Home() {
         downloadCSV(csv, 'cross-chain-fees_'+ targetFee.toString()+'_'+ (new Date().toISOString().replace(':', '_')) +'.csv');
       }}>Generate CSV</button>
       {/* <button>Generate JSON</button> */}
-      <button onClick={async () => {
-        let fees = await fetch("/api/currentFee");
-        fees = await fees.json();
-        const csv = convertArrayOfObjectsToCSV('TokenPairId,From,To,Symbol,Decimals,NetworkFee,IsPercent,OperationFee,IsPercent', fees);
-        downloadCSV(csv, 'cross-chain-fees_'+ targetFee.toString()+'_'+ (new Date().toISOString().replace(':', '_')) +'.csv');
-      }}>Download Current Fees CSV</button>
+      {
+        coinPrices.length > 0 && <button onClick={async () => {
+          let fees = await fetch("/api/currentFee");
+          fees = await fees.json();
+          const csv = convertArrayOfObjectsToCSV('TokenPairId,From,To,Symbol,Decimals,NetworkFee,IsPercent,OperationFee,IsPercent', fees);
+          downloadCSV(csv, 'cross-chain-fees_'+ targetFee.toString()+'_'+ (new Date().toISOString().replace(':', '_')) +'.csv');
+        }}>Download Current Fees CSV</button>
+      }
     </div>
   );
 }
