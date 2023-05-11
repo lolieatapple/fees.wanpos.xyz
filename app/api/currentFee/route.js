@@ -11,7 +11,7 @@ let option = {
   timeout: 5000,
 };
 
-export async function GET(req, res) {
+export async function POST(req, res) {
   try {
     let allFees = [];
     let iWan = new iWanClient(

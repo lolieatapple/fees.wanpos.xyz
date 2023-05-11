@@ -384,7 +384,7 @@ export default function Home() {
             //   headers: myHeaders
             // });
             // fees = await fees.json();
-            let fees = await axios.get('/api/currentFee' + '?t=' + Date.now());
+            let fees = await axios.post('/api/currentFee');
             fees = fees.data;
             fees = fees.data;
             const csv = convertArrayOfObjectsToCSV('TokenPairId,From,To,Symbol,Decimals,NetworkFee,IsPercent,OperationFee,IsPercent', fees);
