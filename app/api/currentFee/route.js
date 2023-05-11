@@ -20,13 +20,10 @@ export async function POST(req, res) {
       option
     );
 
-    // 定义最大并发数量
     const MAX_CONCURRENT = 10;
 
-    // 定义一个队列来存放待处理的任务
     let taskQueue = [];
 
-    // 遍历 tokenPair，为每个 pair 创建一个任务，然后将任务添加到队列中
     tokenPair.forEach((pair) => {
       taskQueue.push(async () => {
         let from, to, symbol;
