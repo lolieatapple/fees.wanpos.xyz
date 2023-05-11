@@ -41,8 +41,8 @@ export async function GET(req) {
     const SmgReleaseLogger = iface.getEventTopic("SmgReleaseLogger");
     const SmgMintLogger = iface.getEventTopic("SmgMintLogger");
 
-    const maxSearchBlock = 30000;
-    const onceSearchBlock = range;
+    const maxSearchBlock = chain === 'arbitrum' ? 1036800 : 30000;
+    const onceSearchBlock = chain === 'arbitrum' ? 10000 : range;
     const maxEventsCount = chain === 'bsc' ? 3 : 30;
     const currentBlockNumber = await iWan.getBlockNumber(_chainType);
     const fromBlock = Math.max(currentBlockNumber - maxSearchBlock, 1);
