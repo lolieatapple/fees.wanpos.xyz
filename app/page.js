@@ -12,6 +12,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { coins, chainType, evmLockAddress } from "../constants/config";
 import Head from "next/head";
+import axios from 'axios';
 
 const DataCard = ({ coinPrices, chain, forceUpdate }) => {
   const [loading, setLoading] = useState(false);
@@ -377,12 +378,20 @@ export default function Home() {
         coinPrices.length > 0 && <button disabled={isLoading} onClick={async () => {
           setIsLoading(true);
           try {
-            var myHeaders = new Headers();
-            myHeaders.append("Cache-Control", "no-cache");
-            let fees = await fetch("/api/currentFee", {
-              headers: myHeaders
+            // var myHeaders = new Headers();
+            // myHeaders.append("Cache-Control", "no-cache");
+            // let fees = await fetch("/api/currentFee", {
+            //   headers: myHeaders
+            // });
+            // fees = await fees.json();
+            let fees = await axios.get('/api/currentFee', {
+              headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+              }
             });
-            fees = await fees.json();
+            fees = fees.data;
             fees = fees.data;
             const csv = convertArrayOfObjectsToCSV('TokenPairId,From,To,Symbol,Decimals,NetworkFee,IsPercent,OperationFee,IsPercent', fees);
             downloadCSV(csv, 'cross-chain-fees_'+ targetFee.toString()+'_'+ (new Date().toISOString().replace(':', '_')) +'.csv');
