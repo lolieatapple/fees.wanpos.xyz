@@ -377,7 +377,11 @@ export default function Home() {
         coinPrices.length > 0 && <button disabled={isLoading} onClick={async () => {
           setIsLoading(true);
           try {
-            let fees = await fetch("/api/currentFee");
+            var myHeaders = new Headers();
+            myHeaders.append("Cache-Control", "no-cache");
+            let fees = await fetch("/api/currentFee", {
+              headers: myHeaders
+            });
             fees = await fees.json();
             fees = fees.data;
             const csv = convertArrayOfObjectsToCSV('TokenPairId,From,To,Symbol,Decimals,NetworkFee,IsPercent,OperationFee,IsPercent', fees);
