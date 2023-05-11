@@ -49,7 +49,7 @@ const DataCard = ({ coinPrices, chain, forceUpdate }) => {
       console.log("price not ready");
       return;
     }
-    
+
     if (!evmLockAddress[chain]) {
       if (!["btc", "doge", "ltc"].includes(chain)) {
         console.log(chain, "not supported");
@@ -196,7 +196,7 @@ const DataCard = ({ coinPrices, chain, forceUpdate }) => {
       <div className="card-content">
         <div className="card-title">{chain}</div>
         <div className="card-text">Avg Cost: ${average}</div>
-        <div className="card-text">Current Fee: $20</div>
+        {/* <div className="card-text">Current Fee: $20</div> */}
         <div className="card-text">
           {coinPrice.symbol} Price: ${coinPrice.usd}
         </div>
