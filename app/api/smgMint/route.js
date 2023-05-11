@@ -12,6 +12,62 @@ let option = {
   timeout: 5000,
 };
 
+function get3dayBlocks(chain) {
+  if (chain === 'arbitrum') {
+    return 1036800;
+  }
+
+  if (chain === 'polygon') {
+    return 129600;
+  }
+
+  if (chain === 'optimism') {
+    return 129600;
+  }
+
+  if (chain === 'ethereum') {
+    return 20000;
+  }
+
+  return 30000;
+}
+
+function getScanLimit(chain) {
+  if (chain === 'arbitrum') {
+    return 20000;
+  }
+
+  if (chain === 'bsc') {
+    return 1000;
+  }
+
+  if (chain === 'polygon') {
+    return 1000;
+  }
+
+  if (chain === 'avalanche') {
+    return 2048;
+  }
+
+  if (chain === 'okexchain') {
+    return 2000;
+  }
+
+  if (chain === 'optimism') {
+    return 500;
+  }
+
+  if (chain === 'ethereum') {
+    return 2000;
+  }
+
+  if (chain === 'astar') {
+    return 1000;
+  }
+
+  return 5000;
+}
+
 
 export async function GET(req) {
   console.log('req', req.url);
@@ -41,8 +97,8 @@ export async function GET(req) {
     const SmgReleaseLogger = iface.getEventTopic("SmgReleaseLogger");
     const SmgMintLogger = iface.getEventTopic("SmgMintLogger");
 
-    const maxSearchBlock = chain === 'arbitrum' ? 1036800 : 30000;
-    const onceSearchBlock = chain === 'arbitrum' ? 10000 : range;
+    const maxSearchBlock = get3dayBlocks(chain);
+    const onceSearchBlock = getScanLimit(chain);
     const maxEventsCount = chain === 'bsc' ? 3 : 30;
     const currentBlockNumber = await iWan.getBlockNumber(_chainType);
     const fromBlock = Math.max(currentBlockNumber - maxSearchBlock, 1);

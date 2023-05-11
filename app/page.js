@@ -252,7 +252,7 @@ export default function Home() {
         const now = new Date();
         const cacheTime = new Date(pricesCache.time);
         const diff = now - cacheTime;
-        if (diff < 1000 * 60) {
+        if (diff < 1000 * 10) {
           console.log("using cached prices");
           setCoinPrices(pricesCache.prices);
           return;
