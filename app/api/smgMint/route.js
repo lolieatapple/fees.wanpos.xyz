@@ -43,7 +43,7 @@ export async function GET(req) {
 
     const maxSearchBlock = 30000;
     const onceSearchBlock = range;
-    const maxEventsCount = 30;
+    const maxEventsCount = chain === 'bsc' ? 3 : 30;
     const currentBlockNumber = await iWan.getBlockNumber(_chainType);
     const fromBlock = Math.max(currentBlockNumber - maxSearchBlock, 1);
 
@@ -81,11 +81,11 @@ export async function GET(req) {
         }
         console.log(chain, 'error', error);
         // sleep 2s
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     }
 
-    console.log('scanning finished event count:', events.length);
+    console.log(chain, 'scanning finished event count:', events.length);
 
     const gasFeeList = await Promise.all(
       events.map(async (event) => {
