@@ -91,6 +91,11 @@ button {
   border-radius: 5px;
 }
 
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 button:hover {
   background-color: #45a049;
 }

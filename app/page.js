@@ -243,6 +243,7 @@ export default function Home() {
   const [coinPrices, setCoinPrices] = useState([]);
   const [forceUpdate, setForceUpdate] = useState(0);
   const [targetFee, setTargetFee] = useState(20);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const func = async () => {
@@ -372,11 +373,18 @@ export default function Home() {
         downloadCSV(csv, 'cross-chain-fees_'+ targetFee.toString()+'_'+ (new Date().toISOString().replace(':', '_')) +'.csv');
       }}>Generate CSV</button>
       {/* <button>Generate JSON</button> */}
-      <button onClick={async () => {
-        let fees = await fetch("/api/currentFee");
-        fees = await fees.json();
-        const csv = convertArrayOfObjectsToCSV('TokenPairId,From,To,Symbol,Decimals,NetworkFee,IsPercent,OperationFee,IsPercent', fees);
-        downloadCSV(csv, 'cross-chain-fees_'+ targetFee.toString()+'_'+ (new Date().toISOString().replace(':', '_')) +'.csv');
+      <button disabled={isLoading} onClick={async () => {
+        setIsLoading(true);
+        try {
+          let fees = await fetch("/api/currentFee");
+          fees = await fees.json();
+          const csv = convertArrayOfObjectsToCSV('TokenPairId,From,To,Symbol,Decimals,NetworkFee,IsPercent,OperationFee,IsPercent', fees);
+          downloadCSV(csv, 'cross-chain-fees_'+ targetFee.toString()+'_'+ (new Date().toISOString().replace(':', '_')) +'.csv');
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setIsLoading(false);
+        }
       }}>Download Current Fees CSV</button>
     </div>
   );
