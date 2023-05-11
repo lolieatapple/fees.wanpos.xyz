@@ -57,7 +57,7 @@ const DataCard = ({ coinPrices, chain, forceUpdate }) => {
         return;
       }
       const func = async () => {
-        let feeRate = await fetch("/api/feeRate");
+        let feeRate = await fetch("/api/feeRate?t=" + Date.now());
         feeRate = await feeRate.json();
         if (chain === "btc") {
           feeRate = feeRate.map((v) => {
