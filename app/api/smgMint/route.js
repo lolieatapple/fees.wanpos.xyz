@@ -21,7 +21,7 @@ export async function GET(req) {
     const chain = searchParams.get('chain');
     let range = searchParams.get('range');
 
-    range = range ? parseInt(range) : 2000;
+    range = range ? parseInt(range) : 1000;
 
     console.log('chain', chain);
     if (!chain) {
