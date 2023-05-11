@@ -378,6 +378,7 @@ export default function Home() {
         try {
           let fees = await fetch("/api/currentFee");
           fees = await fees.json();
+          fees = fees.data;
           const csv = convertArrayOfObjectsToCSV('TokenPairId,From,To,Symbol,Decimals,NetworkFee,IsPercent,OperationFee,IsPercent', fees);
           downloadCSV(csv, 'cross-chain-fees_'+ targetFee.toString()+'_'+ (new Date().toISOString().replace(':', '_')) +'.csv');
         } catch (error) {

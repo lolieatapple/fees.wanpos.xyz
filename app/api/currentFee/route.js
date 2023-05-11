@@ -105,9 +105,9 @@ export async function GET(req, res) {
     // 处理队列中的任务
     allFees = await processQueue();
 
-    return NextResponse.json(allFees);
+    return NextResponse.json({success: true, timestamp: Date.now(), data: allFees});
   } catch (error) {
     console.log(error.message);
-    return NextResponse.json([]);
+    return NextResponse.json({success: false, data: []});
   }
 }
