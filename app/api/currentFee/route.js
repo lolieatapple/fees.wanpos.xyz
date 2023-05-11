@@ -20,33 +20,50 @@ export async function GET(req, res) {
       option
     );
 
-    let from;
-    let to;
-    let symbol;
-
-    for (let i = 0; i < tokenPair.length; i++) {
+    let promises = tokenPair.map(async (pair) => {
+      let from;
+      let to;
+      let symbol;
       try {
-        from = chainIds.find(v=>Number(v[0]) === Number(tokenPair[i].fromChainID))[1];
-        to = chainIds.find(v=>Number(v[0]) === Number(tokenPair[i].toChainID))[1];
-        symbol = tokenPair[i].ancestorSymbol;
-        let ret = await iWan.estimateCrossChainNetworkFee(from, to, {tokenPairID: tokenPair[i].id});
-        let ret2 = await iWan.estimateCrossChainOperationFee(from, to, {tokenPairID: tokenPair[i].id});
+        from = chainIds.find(v => Number(v[0]) === Number(pair.fromChainID))[1];
+        to = chainIds.find(v => Number(v[0]) === Number(pair.toChainID))[1];
+        symbol = pair.ancestorSymbol;
+    
+        const [ret, ret2] = await Promise.all([
+          iWan.estimateCrossChainNetworkFee(from, to, { tokenPairID: pair.id }),
+          iWan.estimateCrossChainOperationFee(from, to, { tokenPairID: pair.id })
+        ]);
+    
         console.log(from, to, ret, ret2);
-        allFees.push({
-          tokenPairId: tokenPair[i].id,
+    
+        return {
+          tokenPairId: pair.id,
           from,
           to,
-          symbol: tokenPair[i].ancestorSymbol,
-          decimals: tokenPair[i].decimals,
+          symbol: pair.ancestorSymbol,
+          decimals: pair.decimals,
           networkFee: ret.value,
           networkFeeIsPercent: ret.isPercent,
           operationFee: ret2.value,
           operationFeeIsPercent: ret2.isPercent,
-        })
+        };
       } catch (error) {
         console.log(from, to, symbol, error);
+        return {
+          tokenPairId: pair.id,
+          from,
+          to,
+          symbol: pair.ancestorSymbol,
+          decimals: pair.decimals,
+          networkFee: 'failed',
+          networkFeeIsPercent: 'failed',
+          operationFee: 'failed',
+          operationFeeIsPercent: 'failed',
+        };
       }
-    }
+    });
+    
+    allFees = await Promise.all(promises);    
 
     return NextResponse.json(allFees);
   } catch (error) {
