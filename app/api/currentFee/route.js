@@ -37,6 +37,20 @@ export async function GET(req, res) {
           to = chainIds.find((v) => Number(v[0]) === Number(pair.toChainID))[1];
           symbol = pair.ancestorSymbol;
 
+          if (['ETH', 'BNB', 'AVAX', 'MATIC', 'ARETH'].includes(from) && to === 'WAN') {
+            return {
+              tokenPairId: pair.id,
+              from,
+              to,
+              symbol: pair.ancestorSymbol,
+              decimals: pair.decimals,
+              networkFee: "0",
+              networkFeeIsPercent: false,
+              operationFee: "0",
+              operationFeeIsPercent: false,
+            };
+          }
+
           const [ret, ret2] = await Promise.all([
             iWan.estimateCrossChainNetworkFee(from, to, {
               tokenPairID: pair.id,
