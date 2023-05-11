@@ -37,13 +37,13 @@ export async function GET(req, res) {
           to = chainIds.find((v) => Number(v[0]) === Number(pair.toChainID))[1];
           symbol = pair.ancestorSymbol;
 
-          if (['ETH', 'BNB', 'AVAX', 'MATIC', 'ARETH'].includes(from) && to === 'WAN') {
+          if (['ETH', 'BNB', 'AVAX', 'MATIC', 'ARETH', 'OETH', 'OKT', 'XDC'].includes(from) && to === 'WAN') {
             return {
               tokenPairId: pair.id,
               from,
               to,
               symbol: pair.ancestorSymbol,
-              decimals: pair.decimals,
+              decimals: pair.decimals ? pair.decimals : 0,
               networkFee: "0",
               networkFeeIsPercent: false,
               operationFee: "0",
@@ -67,7 +67,7 @@ export async function GET(req, res) {
             from,
             to,
             symbol: pair.ancestorSymbol,
-            decimals: pair.decimals,
+            decimals: pair.decimals ? pair.decimals : 0,
             networkFee: ret.value,
             networkFeeIsPercent: ret.isPercent,
             operationFee: ret2.value,
@@ -80,7 +80,7 @@ export async function GET(req, res) {
             from,
             to,
             symbol: pair.ancestorSymbol,
-            decimals: pair.decimals,
+            decimals: pair.decimals ? pair.decimals : 0,
             networkFee: "failed",
             networkFeeIsPercent: "failed",
             operationFee: "failed",
