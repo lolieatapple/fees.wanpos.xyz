@@ -292,9 +292,6 @@ export default function Home() {
 
   return (
     <div className="container">
-      <Head>
-        <title>Cross Chain Fees Manager</title>
-      </Head>
       <h1>Cross Chain Fees Manager</h1>
       <br />
       <div className="subtitle-container">
