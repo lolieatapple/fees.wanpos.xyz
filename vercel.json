@@ -6,8 +6,7 @@
     },
     {
       "path": "/api/test",
-      "schedule": "*/1 * * * *",
-      "method": "POST"
+      "schedule": "*/1 * * * *"
     }
   ]
 }
