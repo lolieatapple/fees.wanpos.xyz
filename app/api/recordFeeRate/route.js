@@ -33,7 +33,7 @@ export async function GET(req, res) {
     console.log('history', history);
 
     if (history && history.length && history.length > 72) {
-      history.slice(1);
+      history.slice(-71);
     }
 
     history.push(save);
