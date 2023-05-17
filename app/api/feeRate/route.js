@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { get } from '../kv';
 
-export async function GET(req, res) {
+export async function POST(req, res) {
   try {
     let feeRate = await get('feeRate');
     console.log('feeRate', feeRate);
@@ -11,3 +11,4 @@ export async function GET(req, res) {
     return NextResponse.json([]);
   }
 }
+
