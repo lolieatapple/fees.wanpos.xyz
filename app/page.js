@@ -71,7 +71,7 @@ const DataCard = ({ coinPrices, chain, forceUpdate }) => {
               cost:
                 coinPrice.usd !== "N/A"
                   ? (
-                      ((Number(v.btcFeeRate) * 0.304) / 1e8) *
+                      ((Number(v.btcFeeRate) * 0.301) / 1e8) *
                       Number(coinPrice.usd)
                     ).toFixed(4)
                   : v.btcFeeRate / 1e8,
