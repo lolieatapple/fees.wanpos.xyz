@@ -206,7 +206,7 @@ const DataCard = ({ coinPrices, chain, forceUpdate }) => {
         <LineChart width={500} height={130} data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="time" />
-          <YAxis />
+          <YAxis padding={{top: 30}} />
           <Tooltip />
           <Line
             type="monotone"
@@ -313,7 +313,7 @@ export default function Home() {
       <div className="section">
         {
         Object.keys(chainType)
-          // .filter(v=>v==='fantom')
+          // .filter(v=>v==='btc')
           .map((chain) => {
           return (
             <DataCard
