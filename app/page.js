@@ -260,9 +260,21 @@ export default function Home() {
           return;
         }
       }
-
-      let res = await fetch("/api/price");
-      let prices = await res.json();
+      
+      let res;
+      let prices;
+      // auto retry when failed in loop
+      while (true) {
+        try {
+          res = await fetch("/api/price");
+          prices = await res.json();
+          break;
+        } catch (error) {
+          console.log("retrying...");
+          // sleep 5 seconds
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+        }
+      }
 
       const symbolUsdArray = Object.keys(prices).map((key) => {
         const coinData = coins[key];
@@ -284,12 +296,17 @@ export default function Home() {
         })
       );
     };
+    setIsLoading(true);
 
     func()
-      .then(() => {})
+      .then(() => {
+      })
       .catch((err) => {
         console.error(err);
-      });
+      })
+      .finally(()=>{
+        setIsLoading(false);
+      })
   }, [forceUpdate]);
 
   return (
