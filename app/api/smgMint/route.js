@@ -124,16 +124,25 @@ export async function GET(req) {
         if (toBlock >= blockNumber) {
           break;
         }
-        const batchEvents = await Promise.all([
-          iWan.getScEvent(_chainType, evmLockAddress[chain], [SmgReleaseLogger], {
-            fromBlock: toBlock + 1,
-            toBlock: blockNumber,
-          }),
-          iWan.getScEvent(_chainType, evmLockAddress[chain], [SmgMintLogger], {
-            fromBlock: toBlock + 1,
-            toBlock: blockNumber,
-          }),
-        ]);
+
+        let batchEvents;
+        try {
+          batchEvents = await Promise.all([
+            iWan.getScEvent(_chainType, evmLockAddress[chain], [SmgReleaseLogger], {
+              fromBlock: toBlock + 1,
+              toBlock: blockNumber,
+            }),
+            iWan.getScEvent(_chainType, evmLockAddress[chain], [SmgMintLogger], {
+              fromBlock: toBlock + 1,
+              toBlock: blockNumber,
+            }),
+          ]);
+        } catch (error) {
+          console.log(chain, 'error', error, ', sleep 5 seconds to retry');
+          // sleep 3 seconds
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+          continue;
+        }
   
         const newEvents = batchEvents.reduce((acc, cur) => acc.concat(cur), []);
         console.log(chain, 'scanning block', toBlock + 1, 'to', blockNumber, 'event count:', newEvents.length);
