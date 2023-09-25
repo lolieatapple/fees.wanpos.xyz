@@ -12,3 +12,4 @@ export async function POST(req, res) {
   }
 }
 
+export const maxDuration = 300;

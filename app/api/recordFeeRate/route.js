@@ -50,3 +50,5 @@ export async function GET(req, res) {
 export async function POST(req, res) {
   return NextResponse.json({ name: 'POST John Doe' })
 }
+
+export const maxDuration = 300;
