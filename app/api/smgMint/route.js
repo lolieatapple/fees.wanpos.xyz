@@ -18,7 +18,15 @@ function get3dayBlocks(chain) {
   }
 
   if (chain === 'polygon') {
-    return 129600;
+    return 8000;
+  }
+
+  if (chain === 'astar') {
+    return 8000;
+  }
+
+  if (chain === 'telos') {
+    return 8000;
   }
 
   if (chain === 'optimism') {
@@ -138,7 +146,15 @@ export async function GET(req) {
             }),
           ]);
         } catch (error) {
-          console.log(chain, 'error', error, ', sleep 5 seconds to retry');
+          console.log(chain, 'error1', error, ', sleep 5 seconds to retry');
+          if (error.toString().include('Method not found')) {
+            break;
+          }
+
+          if (error.toString().include('Invalid JSON RPC response')) {
+            break;
+          }
+
           // sleep 3 seconds
           await new Promise((resolve) => setTimeout(resolve, 5000));
           continue;
@@ -152,7 +168,7 @@ export async function GET(req) {
         if (errorCnt++ > 5) {
           break;
         }
-        console.log(chain, 'error', error);
+        console.log(chain, 'error2', error);
         // sleep 2s
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }
@@ -187,7 +203,7 @@ export async function GET(req) {
 
     return NextResponse.json({success: true, data: gasFeeList});
   } catch (error) {
-    console.log('error', error);
+    console.log('error3', error);
     console.log(error.message);
     return NextResponse.json({error: error.message});
   }
